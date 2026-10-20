@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La Pellicule — L'histoire du Québec et du Canada</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080808; --ink:#f2f2f2; --muted:#b8b8b8;
+  --red:#E50914; --red-d:#8f060d; --gold:#f5c518;
+  --p1:#E50914; --p2:#f5a623; --p3:#2ea8ff; --p4:#7bed6c;
+  --display:"Bebas Neue",Impact,sans-serif; --body:"Work Sans",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);min-height:100vh;transition:background 1s}
+/* --- MODE PROJECTION : l'environnement de jeu --- */
+body.playing{background:#040404}
+body.playing .wrap{max-width:1440px}
+body.playing header{padding:14px 0 4px}
+body.playing header h1{font-size:clamp(2rem,5vw,3rem)}
+body.playing header .sub,body.playing header .rule{display:none}
+body.playing .panel,body.playing .legend{display:none}
+/* halo du projecteur en marche */
+body.playing::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background:radial-gradient(ellipse at 50% 0%,rgba(255,244,214,.05),transparent 55%)}
+/* scintillement subtil du projecteur */
+body.playing .projflick{position:fixed;inset:0;pointer-events:none;z-index:2;background:#fff8e1;opacity:0;animation:flick 4.2s steps(1) infinite}
+@keyframes flick{0%,100%{opacity:0}7%{opacity:.016}7.4%{opacity:0}31%{opacity:.012}31.3%{opacity:0}66%{opacity:.02}66.2%{opacity:0}89%{opacity:.01}89.2%{opacity:0}}
+/* bobines d'ambiance */
+.amb-reel{position:fixed;top:50%;width:190px;height:190px;border-radius:50%;pointer-events:none;z-index:0;opacity:.16;
+  background:conic-gradient(from 0deg,#1c1c1c,#2e2e2e 8%,#1c1c1c 16%,#2e2e2e 24%,#1c1c1c 32%,#2e2e2e 40%,#1c1c1c 48%,#2e2e2e 56%,#1c1c1c 64%,#2e2e2e 72%,#1c1c1c 80%,#2e2e2e 88%,#1c1c1c);
+  border:12px solid #0d0d0d;display:none}
+.amb-reel::after{content:"";position:absolute;inset:52px;border-radius:50%;background:#060606;border:3px solid #2a2a2a}
+.amb-reel.left{left:-70px;transform:translateY(-50%)}
+.amb-reel.right{right:-70px;transform:translateY(-50%)}
+body.playing .amb-reel{display:block;animation:spin 26s linear infinite}
+body.playing .amb-reel.right{animation-direction:reverse}
+/* progression du film */
+.filmprog{position:sticky;top:0;z-index:60;display:none;margin:0 -18px 18px;background:#0a0a0a;border-bottom:1px solid #1e1e1e;padding:10px 18px}
+body.playing .filmprog{display:block}
+.filmprog .track{height:16px;border-radius:8px;background:#161616;position:relative;overflow:hidden;border:1px solid #262626}
+.filmprog .fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--red),#ff5a3c);box-shadow:0 0 16px rgba(229,9,20,.6);transition:width .5s cubic-bezier(.2,.9,.3,1.2)}
+.filmprog .plabel{display:flex;justify-content:space-between;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:#b8b8b8;margin-top:6px}
+/* zone de travail éclairée */
+body.playing .drawn-zone{position:relative;z-index:3}
+body.playing .photogram{box-shadow:0 30px 90px rgba(0,0,0,.9),0 0 80px color-mix(in srgb,var(--pc) 30%,transparent),0 0 4px #fff1}
+body.playing .lighttable{box-shadow:inset 0 8px 30px rgba(0,0,0,.92),0 0 60px rgba(255,244,214,.05);border-color:#242424}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:200;opacity:.04;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E")}
+.wrap{max-width:1280px;margin:0 auto;padding:20px 18px 70px}
+/* ============ HEADER simple et net ============ */
+header{text-align:center;padding:40px 0 14px;position:relative;overflow:hidden}
+header::before{content:"";position:absolute;top:-40px;left:50%;transform:translateX(-50%);width:340px;height:220px;pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,240,200,.10),rgba(255,240,200,.02) 70%,transparent);
+  clip-path:polygon(42% 0,58% 0,100% 100%,0% 100%);filter:blur(6px);animation:beamsway 7s ease-in-out infinite}
+@keyframes beamsway{0%,100%{transform:translateX(-50%) rotate(-2.5deg)}50%{transform:translateX(-50%) rotate(2.5deg)}}
+header .kicker{font-size:.7rem;letter-spacing:.44em;text-transform:uppercase;color:#d8d8d8;margin-bottom:12px;position:relative}
+header h1{font-family:var(--display);font-size:clamp(3.8rem,12vw,7rem);letter-spacing:.05em;line-height:.9;color:#fff;position:relative;
+  text-shadow:0 6px 0 #2a0507,0 12px 34px rgba(0,0,0,.9)}
+header h1 .r{color:var(--red);text-shadow:0 6px 0 #4a0508,0 0 44px rgba(229,9,20,.55),0 12px 34px rgba(0,0,0,.9)}
+header .rule{width:170px;height:5px;background:linear-gradient(90deg,transparent,var(--red),transparent);margin:18px auto 0;border-radius:3px;box-shadow:0 0 22px rgba(229,9,20,.8);position:relative}
+header .sub{color:#c9c9c9;margin-top:14px;font-size:.98rem;position:relative}
+.stats{display:flex;gap:36px;justify-content:center;margin:18px 0 4px;flex-wrap:wrap}
+.stat{text-align:center;min-width:84px}
+.stat b{font-family:var(--display);font-size:2.5rem;display:block;line-height:1;color:#fff}
+.stat span{font-size:.66rem;text-transform:uppercase;letter-spacing:.16em;color:var(--muted)}
+.takes{font-size:1.9rem;letter-spacing:6px;line-height:1.7}
+.takes .on{color:var(--red);text-shadow:0 0 18px var(--red);animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.takes .off{color:#222}
+/* ============ COUNTDOWN ============ */
+.countdown{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;background:#050505;opacity:0;pointer-events:none;transition:opacity .25s}
+.countdown.show{opacity:1}
+.countdown .circle{width:min(300px,70vw);height:min(300px,70vw);border-radius:50%;border:6px solid #2c2c2c;display:flex;align-items:center;justify-content:center;position:relative;background:radial-gradient(circle,#1c1c1c,#0a0a0a)}
+.countdown .num{font-family:var(--display);font-size:7rem;color:#fff;text-shadow:0 0 40px rgba(229,9,20,.8)}
+.countdown .sweep{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from -90deg,rgba(229,9,20,.5),transparent 30%);animation:sweep 1s linear infinite}
+@keyframes sweep{to{transform:rotate(360deg)}}
+/* ============ SETUP : bobines ============ */
+.panel{margin:26px 0;padding:10px 0 6px;position:relative}
+.panel h2{font-family:var(--display);font-size:2.1rem;letter-spacing:.08em;text-align:center}
+.panel h2 .r{color:var(--red);text-shadow:0 0 18px rgba(229,9,20,.55)}
+.panel .psub{text-align:center;color:#b8b8b8;font-size:.88rem;margin-top:6px}
+.station{margin:30px 0;text-align:center}
+.rowlbl{font-size:.7rem;text-transform:uppercase;letter-spacing:.3em;color:#c9c9c9;margin:0 0 18px;display:flex;align-items:center;justify-content:center;gap:14px}
+.rowlbl::before,.rowlbl::after{content:"";width:60px;height:1px;background:#2e2e2e}
+.reels{display:flex;flex-wrap:wrap;gap:16px;justify-content:center}
+.reelbtn{cursor:pointer;border:none;background:none;padding:0;font:inherit;transition:.2s;opacity:.55;filter:saturate(.4)}
+.reelbtn .can{width:150px;height:150px;border-radius:50%;margin:0 auto;position:relative;
+  background:conic-gradient(from 0deg,#1e1e1e,#333 8%,#1e1e1e 16%,#333 24%,#1e1e1e 32%,#333 40%,#1e1e1e 48%,#333 56%,#1e1e1e 64%,#333 72%,#1e1e1e 80%,#333 88%,#1e1e1e);
+  border:10px solid #101010;box-shadow:0 10px 30px rgba(0,0,0,.7),inset 0 0 0 3px var(--c)}
+.reelbtn .can::after{content:"";position:absolute;inset:34px;border-radius:50%;background:#0a0a0a;border:3px solid var(--c);box-shadow:0 0 18px var(--c)}
+.reelbtn .rname{font-family:var(--display);font-size:1.25rem;letter-spacing:.05em;margin-top:12px;color:#fff}
+.reelbtn .rcount{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
+.reelbtn[aria-pressed="true"]{opacity:1;filter:none;transform:translateY(-4px)}
+.reelbtn[aria-pressed="true"] .can{animation:spin 9s linear infinite;box-shadow:0 14px 36px rgba(0,0,0,.7),0 0 30px color-mix(in srgb,var(--c) 50%,transparent),inset 0 0 0 3px var(--c)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.reelbtn:hover{opacity:.9;transform:translateY(-3px)}
+.chips{display:flex;flex-wrap:wrap;gap:9px}
+.chip{font:inherit;font-weight:700;font-size:.85rem;border:2px solid #333;background:#181818;color:var(--ink);padding:9px 16px;border-radius:999px;cursor:pointer;transition:.16s}
+.chip[aria-pressed="true"]{border-color:var(--red);background:rgba(229,9,20,.18);box-shadow:0 0 18px rgba(229,9,20,.45)}
+.chip:hover{border-color:var(--red);transform:translateY(-2px)}
+.projswitch{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:26px}
+.projswitch{display:flex;flex-direction:column;align-items:center;gap:16px}
+.switchbase{width:230px;height:150px;background:linear-gradient(180deg,#262626,#101010);border-radius:22px;border:2px solid #3a3a3a;position:relative;cursor:pointer;transition:.18s;
+  box-shadow:0 16px 44px rgba(0,0,0,.8),inset 0 2px 0 rgba(255,255,255,.09),inset 0 -6px 14px rgba(0,0,0,.5)}
+.switchbase::before{content:"";position:absolute;inset:10px;border-radius:14px;border:1px solid #2c2c2c;pointer-events:none}
+.switchbase:hover{border-color:var(--red);box-shadow:0 16px 50px rgba(229,9,20,.4),inset 0 2px 0 rgba(255,255,255,.09)}
+.switchbase .lever{position:absolute;top:18px;left:50%;transform:translateX(-50%);width:38px;height:76px;border-radius:19px;background:linear-gradient(180deg,#555,#1d1d1d);border:2px solid #5c5c5c;transition:.24s cubic-bezier(.3,1.5,.5,1);box-shadow:0 4px 12px rgba(0,0,0,.6)}
+.switchbase .lever::after{content:"";position:absolute;top:10px;left:50%;transform:translateX(-50%);width:52px;height:52px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#ff5a63,#c00a14 58%,#6e040b);box-shadow:0 0 30px rgba(229,9,20,.9),0 6px 14px rgba(0,0,0,.55),inset 0 2px 4px rgba(255,255,255,.35)}
+.switchbase .slabel{position:absolute;bottom:12px;left:0;right:0;text-align:center;font-family:var(--display);font-size:.95rem;letter-spacing:.3em;color:#d8d8d8}
+.switchbase.armed .lever{transform:translateX(-50%) translateY(34px)}
+.switchbase.armed{border-color:var(--red);box-shadow:0 0 60px rgba(229,9,20,.65),inset 0 2px 0 rgba(255,255,255,.09)}
+.switchbase.armed .lever::after{box-shadow:0 0 44px rgba(229,9,20,1),0 6px 14px rgba(0,0,0,.55),inset 0 2px 4px rgba(255,255,255,.35)}
+.projhint{font-size:.76rem;color:#b8b8b8;letter-spacing:.2em;text-transform:uppercase}
+.btn{font-family:var(--display);font-size:1.5rem;letter-spacing:.12em;color:#fff;border:none;border-radius:12px;padding:15px 50px;cursor:pointer;transition:.16s;
+  background:linear-gradient(180deg,#ff1e28,#a5060e);box-shadow:0 8px 34px rgba(229,9,20,.55),inset 0 2px 0 rgba(255,255,255,.3),inset 0 -3px 0 rgba(0,0,0,.35)}
+.btn:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 14px 46px rgba(229,9,20,.75),inset 0 2px 0 rgba(255,255,255,.3)}
+/* ============ PHOTOGRAMME À PLACER ============ */
+.drawn-zone{display:flex;flex-direction:column;align-items:center;gap:14px;margin:16px 0 34px;min-height:300px;justify-content:center}
+.clap-lbl{font-size:.7rem;letter-spacing:.32em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:12px}
+.clap-lbl::before,.clap-lbl::after{content:"";width:44px;height:1px;background:#333}
+.photogram{background:#0d0d0d;border-radius:12px;max-width:660px;width:100%;overflow:hidden;position:relative;
+  box-shadow:0 28px 80px rgba(0,0,0,.85),0 0 60px color-mix(in srgb,var(--pc) 22%,transparent);animation:cardin .5s cubic-bezier(.2,.9,.3,1.25);border:1px solid #2a2a2a}
+@keyframes cardin{from{transform:translateY(46px) rotate(1.5deg) scale(.94);opacity:0}to{transform:none;opacity:1}}
+.photogram .sprockets{height:24px;background:repeating-linear-gradient(90deg,#2e2e2e 0 13px,#080808 13px 20px,#2e2e2e 20px 33px)}
+.photogram .pband{height:6px;background:var(--pc);box-shadow:0 0 24px var(--pc)}
+.photogram .pinner{padding:26px 32px 24px;position:relative;background:linear-gradient(170deg,#191919,#0e0e0e)}
+.photogram .tc{font-family:var(--display);font-size:.92rem;letter-spacing:.3em;color:var(--pc)}
+.photogram h3{font-family:var(--display);font-size:clamp(2rem,5vw,2.7rem);letter-spacing:.03em;margin:8px 0 10px;line-height:1;color:#fff}
+.photogram p{color:#d5d5d5;font-size:.97rem;line-height:1.62}
+.photogram .dir{margin-top:16px;font-size:.85rem;color:var(--muted);font-style:italic;border-top:1px dashed #333;padding-top:13px}
+.photogram .gloss{position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.09) 45%,transparent 60%);background-size:250% 100%;animation:gloss 4.5s ease-in-out infinite}
+@keyframes gloss{0%{background-position:120% 0}55%,100%{background-position:-40% 0}}
+.gameover{background:linear-gradient(165deg,#1d1d1d,#101010);border:2px solid var(--red);border-radius:18px;padding:46px;max-width:660px;width:100%;text-align:center;box-shadow:0 0 70px rgba(229,9,20,.3);animation:cardin .5s ease}
+.gameover h2{font-family:var(--display);font-size:3.2rem;letter-spacing:.05em;margin-bottom:12px}
+.gameover h2 .r{color:var(--red);text-shadow:0 0 26px rgba(229,9,20,.7)}
+.gameover p{color:var(--muted);margin-bottom:22px;font-size:1.06rem}
+/* ============ TABLE DE MONTAGE : la frise ============ */
+.tl-head{display:flex;align-items:baseline;justify-content:space-between;margin:6px 2px 16px;flex-wrap:wrap;gap:8px}
+.tl-head h2{font-family:var(--display);font-size:1.9rem;letter-spacing:.06em}
+.tl-head h2 .r{color:var(--red)}
+.tl-head .count{font-size:.82rem;color:var(--muted);background:#141414;border:1px solid #282828;padding:7px 15px;border-radius:999px}
+.lighttable{background:#0b0b0b;border-radius:16px;padding:30px 22px;box-shadow:inset 0 8px 30px rgba(0,0,0,.92);border:1px solid #1b1b1b;position:relative}
+.lighttable::before{content:"TABLE DE MONTAGE";position:absolute;top:10px;left:50%;transform:translateX(-50%);font-size:.62rem;letter-spacing:.4em;color:#3d3d3d}
+.frames{display:flex;flex-wrap:wrap;gap:30px 16px;align-items:stretch;padding:20px 8px 8px;justify-content:center}
+/* mini-photogrammes : même langage que la carte à placer */
+.mini{flex:0 1 208px;min-width:180px;max-width:230px;background:#0e0e0e;border-radius:8px;overflow:hidden;position:relative;transition:transform .18s,box-shadow .18s;border:1px solid #2a2a2a}
+.mini .sprockets{height:13px;background:repeating-linear-gradient(90deg,#2b2b2b 0 8px,#080808 8px 12px,#2b2b2b 12px 20px)}
+.mini .pband{height:4px;background:var(--pc);box-shadow:0 0 12px var(--pc)}
+.mini .mbody{padding:11px 13px 11px;background:linear-gradient(170deg,#1b1b1b,#101010)}
+.mini .ftc{font-family:var(--display);font-size:1.05rem;letter-spacing:.08em;color:var(--pc)}
+.mini .ft{font-weight:700;font-size:.86rem;margin:3px 0 6px;line-height:1.3;min-height:2.5em}
+.mini .fp{font-size:.64rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.mini:hover{transform:translateY(-7px);box-shadow:0 16px 36px rgba(0,0,0,.7),0 0 24px color-mix(in srgb,var(--pc) 45%,transparent);z-index:2}
+.mini.new{animation:montage .6s cubic-bezier(.2,.9,.3,1.3);border-color:var(--gold);box-shadow:0 0 36px rgba(245,197,24,.5)}
+@keyframes montage{0%{transform:scale(.72) rotate(5deg);opacity:0}55%{transform:scale(1.08) rotate(-2deg)}100%{transform:scale(1) rotate(0);opacity:1}}
+/* collures : le point de coupe */
+.splice{flex:0 0 auto;display:flex;align-items:center;justify-content:center;min-width:34px;align-self:center}
+.splice button{width:38px;height:38px;border-radius:50%;border:2px dashed #4a4a4a;background:#101010;color:#7d7d7d;font-size:1.35rem;font-weight:800;cursor:pointer;transition:.18s;line-height:1}
+.splice button:hover{border-color:var(--red);border-style:solid;color:#fff;background:radial-gradient(circle at 35% 35%,#ff2a35,#8f060d);transform:scale(1.3) rotate(90deg);box-shadow:0 0 26px rgba(229,9,20,.85)}
+.splice.off{display:none}
+/* flash */
+.reelbanner{position:fixed;top:38%;left:0;right:0;z-index:160;text-align:center;pointer-events:none;opacity:0;transform:scale(.85)}
+.reelbanner.show{animation:reelpop 2.6s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes reelpop{0%{opacity:0;transform:scale(.7)}12%{opacity:1;transform:scale(1.05)}20%{transform:scale(1)}80%{opacity:1}100%{opacity:0;transform:scale(1.02)}}
+.reelbanner .reelbig{font-family:var(--display);font-size:clamp(2.6rem,8vw,4.6rem);letter-spacing:.08em;color:var(--gold);text-shadow:0 0 34px rgba(245,197,24,.7),0 6px 20px #000}
+.reelbanner .reelsmall{font-size:.85rem;letter-spacing:.3em;text-transform:uppercase;color:#d8d8d8;margin-top:6px}
+.flash{position:fixed;inset:0;pointer-events:none;z-index:150;opacity:0}
+.flash.go{animation:flashgo .55s ease}
+.flash.ok{background:radial-gradient(ellipse at center,transparent 35%,rgba(46,168,74,.4))}
+.flash.ko{background:radial-gradient(ellipse at center,transparent 35%,rgba(229,9,20,.45))}
+@keyframes flashgo{0%{opacity:0}25%{opacity:1}100%{opacity:0}}
+/* ============ FEEDBACK ============ */
+.feedback{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(170px);background:#1c1c1c;border:2px solid #333;border-radius:16px;padding:20px 26px;max-width:640px;width:calc(100% - 32px);transition:transform .35s cubic-bezier(.2,.9,.3,1.25);z-index:50;box-shadow:0 18px 60px rgba(0,0,0,.75)}
+.feedback.show{transform:translateX(-50%) translateY(0)}
+.feedback.ok{border-color:#2ea84a;box-shadow:0 18px 60px rgba(0,0,0,.75),0 0 36px rgba(46,168,74,.3)}
+.feedback.ko{border-color:var(--red);box-shadow:0 18px 60px rgba(0,0,0,.75),0 0 36px rgba(229,9,20,.4)}
+.feedback .verdict{font-family:var(--display);font-size:1.75rem;letter-spacing:.07em;margin-bottom:4px}
+.feedback.ok .verdict{color:#5fd97e}.feedback.ko .verdict{color:var(--red)}
+.feedback .detail{font-size:.94rem}
+.feedback .fact{color:var(--muted);font-size:.87rem;margin-top:9px;line-height:1.6;border-top:1px dashed #333;padding-top:9px}
+.feedback .close{position:absolute;top:10px;right:14px;background:none;border:none;color:var(--muted);font-size:1.35rem;cursor:pointer}
+/* ============ LEGEND / FOOTER ============ */
+/* légende supprimée */
+footer{text-align:center;color:#4a4a4a;font-size:.75rem;margin-top:36px;padding-top:18px;border-top:1px solid #1a1a1a}
+@media(max-width:640px){.mini{flex:1 1 44%;min-width:140px}.reelbtn .can{width:110px;height:110px}.reelbtn .can::after{inset:24px}}
+</style>
+</head>
+<body>
+<div class="flash" id="flash"></div>
+<div class="countdown" id="countdown"><div class="circle"><div class="sweep"></div><div class="num" id="cdNum">3</div></div></div>
+
+<div class="projflick"></div>
+<div class="amb-reel left"></div>
+<div class="amb-reel right"></div>
+<div class="filmprog" id="filmprog"><div class="track"><div class="fill" id="progfill" style="width:0%"></div></div><div class="plabel"><span id="progleft">Bobine</span><span id="progright"></span></div></div>
+<div class="wrap">
+<header>
+  <div class="kicker">Histoire du Québec et du Canada · Secondaire 4</div>
+  <h1>LA <span class="r">PELLICULE</span></h1>
+  <div class="rule"></div>
+  <p class="sub">200 événements à monter dans l'ordre. À toi de réaliser le film.</p>
+</header>
+<div class="stats" id="stats"></div>
+
+<div class="panel" id="setup">
+  <h2><span class="r">SALLE</span> DE MONTAGE</h2>
+  <p class="psub">Prépare ta projection : choisis tes bobines, ton mode, puis lance le projecteur.</p>
+  <div class="station">
+    <div class="rowlbl">Bobines</div>
+    <div class="reels" id="periodReels"></div>
+  </div>
+  <div class="station">
+    <div class="rowlbl">Projection</div>
+    <div class="chips" id="modeChips" style="justify-content:center"></div>
+    <div id="teamBox" hidden>
+      <div class="rowlbl" style="margin-top:18px">Équipes</div>
+      <div class="chips" id="teamChips" style="justify-content:center"></div>
+    </div>
+  </div>
+  <div class="station">
+    <div class="projswitch">
+      <div class="switchbase" id="startBtn" role="button" tabindex="0" aria-label="Démarrer la projection"><div class="lever"></div><div class="slabel">MOTEUR</div></div>
+      <div class="projhint">Abaisse le levier pour lancer la projection</div>
+    </div>
+  </div>
+</div>
+
+<div class="drawn-zone" id="drawn"></div>
+
+<div id="tlWrap" hidden>
+  <div class="tl-head"><h2>TABLE <span class="r">DE MONTAGE</span></h2><span class="count" id="tlCount"></span></div>
+  <div class="lighttable"><div class="frames" id="frames"></div></div>
+</div>
+
+<footer>200 événements tirés des notes de cours · Histoire du Québec et du Canada, secondaire 4</footer>
+</div>
+
+<div class="feedback" id="feedback" role="status"></div>
+
+<script>
+const CARDS = [{"y": 1840, "t": "Acte d'Union", "f": "Londres fusionne le Haut et le Bas-Canada en une seule province du Canada, ce qui place les francophones en minorité pour la première fois.", "p": "p1", "pl": "1840-1896"}, {"y": 1841, "t": "Alliance Baldwin-Lafontaine", "f": "les réformistes du Canada-Ouest et du Canada-Est s'unissent pour réclamer le gouvernement responsable.", "p": "p1", "pl": "1840-1896"}, {"y": 1842, "t": "Les réformistes prennent la Chambre", "f": "l'alliance Baldwin-Lafontaine obtient la majorité à la chambre d'assemblée.", "p": "p1", "pl": "1840-1896"}, {"y": 1842, "t": "Commission Bagot", "f": "une enquête recommande de gérer les terres autochtones, de les éduquer et de les évangéliser.", "p": "p1", "pl": "1840-1896"}, {"y": 1844, "t": "Fondation de l'Institut canadien de Montréal", "f": "des jeunes libéraux créent un lieu d'échanges à l'abri du contrôle de l'Église.", "p": "p1", "pl": "1840-1896"}, {"y": 1845, "t": "L'Histoire du Canada de Garneau", "f": "François-Xavier Garneau publie une histoire patriotique qui glorifie les ancêtres canadiens-français.", "p": "p1", "pl": "1840-1896"}, {"y": 1845, "t": "Montréal devient anglophone", "f": "l'immigration britannique fait de Montréal une ville majoritairement anglophone.", "p": "p1", "pl": "1840-1896"}, {"y": 1846, "t": "Abolition des Corn Laws", "f": "l'Angleterre abandonne ses tarifs préférentiels et passe au libre-échange, le Canada perd sa protection commerciale.", "p": "p1", "pl": "1840-1896"}, {"y": 1847, "t": "Arrivée massive d'Irlandais", "f": "fuyant la Grande Famine, 85 000 Irlandais débarquent et 5 500 meurent du typhus.", "p": "p1", "pl": "1840-1896"}, {"y": 1848, "t": "Gouvernement responsable", "f": "lord Elgin accepte que les élus gouvernent, Lafontaine et Baldwin forment le premier gouvernement responsable.", "p": "p1", "pl": "1840-1896"}, {"y": 1849, "t": "Incendie du parlement de Montréal", "f": "les anglophones s'opposent à la loi indemnisant les Patriotes et brûlent le parlement, Elgin sanctionne quand même la loi.", "p": "p1", "pl": "1840-1896"}, {"y": 1849, "t": "Les femmes exclues du vote", "f": "la loi remplace « personne propriétaire » par « homme propriétaire », les femmes perdent le droit de vote.", "p": "p1", "pl": "1840-1896"}, {"y": 1851, "t": "Premières réserves indiennes", "f": "la Province du Canada attribue des terres protégées aux Autochtones pour les sédentariser.", "p": "p1", "pl": "1840-1896"}, {"y": 1851, "t": "Le Canada-Ouest dépasse le Canada-Est", "f": "au recensement, la population anglophone de l'Ouest surpasse celle de l'Est pour la première fois.", "p": "p1", "pl": "1840-1896"}, {"y": 1852, "t": "Fondation du Grand Tronc", "f": "une compagnie de chemin de fer est créée par des hommes d'affaires canadiens et britanniques.", "p": "p1", "pl": "1840-1896"}, {"y": 1852, "t": "Fondation de l'Université Laval", "f": "première université francophone à Québec, financée par l'Église.", "p": "p1", "pl": "1840-1896"}, {"y": 1854, "t": "Abolition du régime seigneurial", "f": "une loi supprime les droits des seigneurs, mais peu d'agriculteurs peuvent racheter leur terre.", "p": "p1", "pl": "1840-1896"}, {"y": 1854, "t": "Traité de réciprocité", "f": "le Canada signe un accord de libre-échange avec les États-Unis pour remplacer le marché britannique.", "p": "p1", "pl": "1840-1896"}, {"y": 1860, "t": "Le Grand Tronc complète sa ligne", "f": "le chemin de fer relie Sarnia à Rivière-du-Loup, Montréal devient une plaque tournante.", "p": "p1", "pl": "1840-1896"}, {"y": 1864, "t": "Fin du Traité de réciprocité", "f": "les États-Unis mettent fin à l'accord commercial, le Canada doit trouver une nouvelle stratégie économique.", "p": "p1", "pl": "1840-1896"}, {"y": 1864, "t": "La Grande Coalition", "f": "Macdonald, Cartier et Brown unissent leurs partis pour faire avancer le projet de fédération.", "p": "p1", "pl": "1840-1896"}, {"y": 1864, "t": "Conférence de Charlottetown", "f": "les colonies s'entendent sur le principe d'une union fédérale, l'Île-du-Prince-Édouard et Terre-Neuve se retirent.", "p": "p1", "pl": "1840-1896"}, {"y": 1864, "t": "Conférence de Québec", "f": "on adopte les 72 Résolutions qui serviront de base à la Constitution et on planifie le chemin de fer intercolonial.", "p": "p1", "pl": "1840-1896"}, {"y": 1866, "t": "Conférence de Londres", "f": "la Grande-Bretagne accepte la création de l'union fédérale canadienne.", "p": "p1", "pl": "1840-1896"}, {"y": 1867, "t": "Confédération canadienne", "f": "le 1er juillet, l'Acte de l'Amérique du Nord britannique crée le Canada avec 4 provinces.", "p": "p1", "pl": "1840-1896"}, {"y": 1867, "t": "Les États-Unis achètent l'Alaska", "f": "pour 7 millions de dollars à la Russie, ce qui inquiète Ottawa pour l'Ouest.", "p": "p1", "pl": "1840-1896"}, {"y": 1869, "t": "Achat de la Terre de Rupert", "f": "le Canada achète l'Ouest à la Compagnie de la Baie d'Hudson pour 1,5 million de dollars.", "p": "p1", "pl": "1840-1896"}, {"y": 1870, "t": "Création du Manitoba", "f": "après la résistance de Louis Riel à la rivière Rouge, le Manitoba devient la 5e province.", "p": "p1", "pl": "1840-1896"}, {"y": 1870, "t": "Exécution de Thomas Scott", "f": "les Métis exécutent un colon ontarien, ce qui force Louis Riel à s'exiler aux États-Unis.", "p": "p1", "pl": "1840-1896"}, {"y": 1871, "t": "La Colombie-Britannique entre au Canada", "f": "elle devient la 6e province à condition qu'on construise un chemin de fer jusqu'au Pacifique.", "p": "p1", "pl": "1840-1896"}, {"y": 1872, "t": "Loi sur les terres du Dominion", "f": "tout homme de 18 ans peut obtenir gratuitement une terre dans l'Ouest s'il la cultive.", "p": "p1", "pl": "1840-1896"}, {"y": 1872, "t": "Loi légalisant les syndicats", "f": "les travailleurs obtiennent le droit de s'organiser pour défendre leurs conditions.", "p": "p1", "pl": "1840-1896"}, {"y": 1873, "t": "L'Île-du-Prince-Édouard entre au Canada", "f": "elle devient la 7e province de la fédération.", "p": "p1", "pl": "1840-1896"}, {"y": 1873, "t": "Crise économique mondiale", "f": "le chômage monte et des usines ferment, les produits canadiens sont lourdement taxés à l'étranger.", "p": "p1", "pl": "1840-1896"}, {"y": 1873, "t": "Scandale du Pacifique", "f": "Macdonald accepte des pots-de-vin pour le contrat du chemin de fer et doit démissionner.", "p": "p1", "pl": "1840-1896"}, {"y": 1875, "t": "Département de l'Instruction publique", "f": "l'État confie l'éducation aux religieux catholiques et protestants selon la confession.", "p": "p1", "pl": "1840-1896"}, {"y": 1876, "t": "Acte des Sauvages", "f": "la loi définit le statut d'Autochtone, crée les réserves et vise leur assimilation.", "p": "p1", "pl": "1840-1896"}, {"y": 1878, "t": "Pavillon de Laval à Montréal", "f": "l'Université Laval ouvre à Montréal, elle deviendra l'Université de Montréal en 1920.", "p": "p1", "pl": "1840-1896"}, {"y": 1878, "t": "Retour de Macdonald", "f": "les conservateurs sont réélus avec leur programme de Politique nationale.", "p": "p1", "pl": "1840-1896"}, {"y": 1879, "t": "Politique nationale", "f": "Macdonald lance un programme protectionniste avec hausse des tarifs, chemin de fer et immigration.", "p": "p1", "pl": "1840-1896"}, {"y": 1880, "t": "Création du Canadien Pacifique", "f": "la compagnie est fondée pour construire le chemin de fer transcontinental jusqu'à Vancouver.", "p": "p1", "pl": "1840-1896"}, {"y": 1880, "t": "Fermeture de l'Institut canadien", "f": "sous la pression de l'Église, l'institution libérale de Montréal doit fermer ses portes.", "p": "p1", "pl": "1840-1896"}, {"y": 1881, "t": "Angéline de Montbrun", "f": "Laure Conan publie un roman et devient l'une des premières femmes à vivre de sa plume.", "p": "p1", "pl": "1840-1896"}, {"y": 1885, "t": "Achèvement du transcontinental", "f": "le chemin de fer relie enfin Montréal à Vancouver après des défis techniques énormes.", "p": "p1", "pl": "1840-1896"}, {"y": 1885, "t": "Pendaison de Louis Riel", "f": "après la deuxième résistance métisse, Riel est jugé et pendu, ce qui indigne le Québec.", "p": "p1", "pl": "1840-1896"}, {"y": 1885, "t": "Télégraphe transcontinental", "f": "une première ligne télégraphique met toutes les régions du pays en communication.", "p": "p1", "pl": "1840-1896"}, {"y": 1887, "t": "Conférence interprovinciale de Mercier", "f": "le premier ministre du Québec dénonce l'ingérence du fédéral et réclame plus d'autonomie.", "p": "p1", "pl": "1840-1896"}, {"y": 1887, "t": "Honoré Mercier au pouvoir", "f": "il devient premier ministre du Québec et défend le nationalisme canadien-français.", "p": "p1", "pl": "1840-1896"}, {"y": 1891, "t": "L'Ouest quadruplé", "f": "grâce à la Politique nationale, la population de l'Ouest passe de 60 000 à 250 000 en 20 ans.", "p": "p1", "pl": "1840-1896"}, {"y": 1893, "t": "Première association féministe", "f": "le Montreal Local Council of Women milite pour l'égalité et les droits des femmes au travail.", "p": "p1", "pl": "1840-1896"}, {"y": 1896, "t": "Élection de Wilfrid Laurier", "f": "premier francophone élu premier ministre du Canada, il restera en poste pendant 15 ans.", "p": "p2", "pl": "1896-1945"}, {"y": 1899, "t": "Guerre des Boers", "f": "le Canada envoie plus de 6 000 volontaires en Afrique du Sud pour soutenir la Grande-Bretagne.", "p": "p2", "pl": "1896-1945"}, {"y": 1900, "t": "Première caisse populaire Desjardins", "f": "Alphonse Desjardins fonde la première caisse populaire à Lévis, début du coopératisme au Québec.", "p": "p2", "pl": "1896-1945"}, {"y": 1901, "t": "Loi sur l'hygiène publique", "f": "le Québec donne aux villes le pouvoir de lutter contre les épidémies avec des égouts, de l'eau potable et la collecte des ordures.", "p": "p2", "pl": "1896-1945"}, {"y": 1905, "t": "Création de la Saskatchewan et de l'Alberta", "f": "deux nouvelles provinces naissent dans l'Ouest grâce à l'immigration.", "p": "p2", "pl": "1896-1945"}, {"y": 1906, "t": "Ouverture du Ouimetoscope", "f": "la première salle de cinéma au monde ouvre ses portes à Montréal.", "p": "p2", "pl": "1896-1945"}, {"y": 1907, "t": "Fédération nationale Saint-Jean-Baptiste", "f": "les féministes canadiennes-françaises s'organisent pour réclamer le droit de vote.", "p": "p2", "pl": "1896-1945"}, {"y": 1907, "t": "Création de l'École des hautes études commerciales", "f": "une école pour former les futurs gens d'affaires du Québec.", "p": "p2", "pl": "1896-1945"}, {"y": 1908, "t": "Premier collège classique pour filles", "f": "les filles peuvent enfin accéder aux études supérieures, surtout pour devenir infirmières ou enseignantes.", "p": "p2", "pl": "1896-1945"}, {"y": 1909, "t": "Naissance du Canadien de Montréal", "f": "le club de hockey est fondé et devient rapidement un symbole pour les Canadiens français.", "p": "p2", "pl": "1896-1945"}, {"y": 1909, "t": "Loi des accidents de travail", "f": "première loi qui prévoit une indemnisation pour les ouvriers blessés au travail.", "p": "p2", "pl": "1896-1945"}, {"y": 1910, "t": "Création de la marine canadienne", "f": "Laurier fait adopter une loi pour construire des navires de guerre, un compromis qui divise francophones et anglophones.", "p": "p2", "pl": "1896-1945"}, {"y": 1910, "t": "Loi sur l'âge des enfants au travail", "f": "il est interdit de faire travailler les enfants de moins de 16 ans qui ne savent ni lire ni écrire.", "p": "p2", "pl": "1896-1945"}, {"y": 1912, "t": "Extension des frontières du Québec", "f": "le Québec, l'Ontario et le Manitoba agrandissent leur territoire jusqu'au 60e parallèle.", "p": "p2", "pl": "1896-1945"}, {"y": 1914, "t": "Attentat de Sarajevo", "f": "l'assassinat de l'archiduc François-Ferdinand déclenche la Première Guerre mondiale.", "p": "p2", "pl": "1896-1945"}, {"y": 1914, "t": "Loi sur les mesures de guerre", "f": "le premier ministre Borden obtient le pouvoir de gouverner par décret et de censurer les journaux.", "p": "p2", "pl": "1896-1945"}, {"y": 1917, "t": "Bataille de la crête de Vimy", "f": "les troupes canadiennes remportent une victoire historique qui fait du Canada une nation militaire respectée.", "p": "p2", "pl": "1896-1945"}, {"y": 1917, "t": "Crise de la conscription", "f": "Borden impose le service militaire obligatoire, ce qui provoque la colère des Canadiens français.", "p": "p2", "pl": "1896-1945"}, {"y": 1918, "t": "Émeutes de Québec", "f": "des manifestations contre la conscription tournent mal et des soldats tuent cinq civils en tirant dans la foule.", "p": "p2", "pl": "1896-1945"}, {"y": 1918, "t": "Droit de vote fédéral des femmes", "f": "toutes les Canadiennes obtiennent le droit de voter aux élections fédérales.", "p": "p2", "pl": "1896-1945"}, {"y": 1918, "t": "Armistice du 11 novembre", "f": "la Première Guerre mondiale prend fin après avoir fait 19 millions de morts.", "p": "p2", "pl": "1896-1945"}, {"y": 1919, "t": "Traité de Versailles", "f": "le Canada signe le traité de paix comme pays souverain, une première dans son histoire.", "p": "p2", "pl": "1896-1945"}, {"y": 1919, "t": "Création de la Société des Nations", "f": "le Canada devient membre de plein droit de cette organisation qui vise la paix mondiale.", "p": "p2", "pl": "1896-1945"}, {"y": 1921, "t": "Fondation de la CTCC", "f": "l'Église crée des syndicats catholiques pour les travailleurs, distincts des centrales américaines.", "p": "p2", "pl": "1896-1945"}, {"y": 1922, "t": "CKAC entre en ondes", "f": "la première station de radio francophone du Québec commence à diffuser.", "p": "p2", "pl": "1896-1945"}, {"y": 1922, "t": "Fondation du Parti communiste du Canada", "f": "un parti d'extrême gauche voit le jour en Ontario.", "p": "p2", "pl": "1896-1945"}, {"y": 1923, "t": "Le primaire passe de 4 à 6 ans", "f": "les enfants restent plus longtemps à l'école primaire au Québec.", "p": "p2", "pl": "1896-1945"}, {"y": 1925, "t": "L'Université de Montréal admet les femmes", "f": "les francophones peuvent enfin étudier la médecine à l'université.", "p": "p2", "pl": "1896-1945"}, {"y": 1927, "t": "Le Labrador accordé à Terre-Neuve", "f": "le conflit territorial entre le Québec et Terre-Neuve se règle en faveur de la colonie britannique.", "p": "p2", "pl": "1896-1945"}, {"y": 1929, "t": "Salaire des femmes mariées", "f": "la Ligue des droits de la femme obtient que la femme qui travaille puisse garder son salaire sans la permission de son mari.", "p": "p2", "pl": "1896-1945"}, {"y": 1929, "t": "Krach boursier du 24 octobre", "f": "l'effondrement de la Bourse de New York, le « jeudi noir », déclenche la Grande Dépression.", "p": "p2", "pl": "1896-1945"}, {"y": 1931, "t": "Statut de Westminster", "f": "le Canada devient autonome sur le plan international et n'est plus obligé de suivre la Grande-Bretagne en guerre.", "p": "p2", "pl": "1896-1945"}, {"y": 1932, "t": "Secours directs", "f": "le gouvernement fédéral distribue des coupons aux chômeurs pour la nourriture, les vêtements et le chauffage.", "p": "p2", "pl": "1896-1945"}, {"y": 1933, "t": "Publication d'« Un homme et son péché »", "f": "le roman de Claude-Henri Grignon devient un immense succès de la littérature du terroir.", "p": "p2", "pl": "1896-1945"}, {"y": 1934, "t": "Parti national social chrétien", "f": "Adrien Arcand fonde un parti fasciste au Québec dont les membres portent la croix gammée.", "p": "p2", "pl": "1896-1945"}, {"y": 1935, "t": "Création de la Banque du Canada", "f": "le gouvernement crée cette institution pour mieux contrôler le système monétaire du pays.", "p": "p2", "pl": "1896-1945"}, {"y": 1936, "t": "Création de Radio-Canada", "f": "le gouvernement fonde une radio publique pour promouvoir la culture canadienne face à l'influence américaine.", "p": "p2", "pl": "1896-1945"}, {"y": 1939, "t": "Début de la Seconde Guerre mondiale", "f": "l'Allemagne envahit la Pologne et la France ainsi que le Royaume-Uni déclarent la guerre le 3 septembre.", "p": "p2", "pl": "1896-1945"}, {"y": 1939, "t": "Le Canada déclare la guerre", "f": "le 10 septembre, une semaine après la Grande-Bretagne, le Canada entre à son tour en guerre contre l'Allemagne.", "p": "p2", "pl": "1896-1945"}, {"y": 1940, "t": "Droit de vote des femmes au Québec", "f": "le gouvernement Godbout accorde enfin aux Québécoises le droit de voter aux élections provinciales.", "p": "p2", "pl": "1896-1945"}, {"y": 1940, "t": "Création de l'assurance-chômage", "f": "un programme fédéral vient en aide aux travailleurs qui perdent leur emploi.", "p": "p2", "pl": "1896-1945"}, {"y": 1942, "t": "Raid de Dieppe", "f": "les troupes canadiennes subissent de lourdes pertes, dont 916 morts, lors de cette tentative de débarquement en France.", "p": "p2", "pl": "1896-1945"}, {"y": 1942, "t": "Plébiscite sur la conscription", "f": "le Québec vote non à 71,2 % à la question d'imposer le service militaire obligatoire.", "p": "p2", "pl": "1896-1945"}, {"y": 1943, "t": "École obligatoire au Québec", "f": "Godbout rend l'école obligatoire jusqu'à 14 ans et gratuite au primaire.", "p": "p2", "pl": "1896-1945"}, {"y": 1943, "t": "Débarquement de Sicile", "f": "les soldats canadiens participent à l'invasion alliée de l'Italie.", "p": "p2", "pl": "1896-1945"}, {"y": 1944, "t": "Débarquement de Normandie", "f": "le 6 juin, les Canadiens débarquent sur la plage Juno en France.", "p": "p2", "pl": "1896-1945"}, {"y": 1944, "t": "Libération de la Hollande", "f": "les troupes canadiennes libèrent les Pays-Bas de l'occupation allemande.", "p": "p2", "pl": "1896-1945"}, {"y": 1944, "t": "Création d'Hydro-Québec", "f": "Godbout nationalise une compagnie d'électricité privée et crée la société d'État Hydro-Québec.", "p": "p2", "pl": "1896-1945"}, {"y": 1944, "t": "Allocations familiales", "f": "le gouvernement fédéral crée des versements mensuels aux mères d'enfants de moins de 16 ans.", "p": "p2", "pl": "1896-1945"}, {"y": 1945, "t": "Fin de la Seconde Guerre mondiale", "f": "l'Allemagne capitule le 8 mai et le Japon le 2 septembre après les bombes atomiques d'Hiroshima et Nagasaki.", "p": "p2", "pl": "1896-1945"}, {"y": 1945, "t": "Baby-boom", "f": "forte hausse des naissances après la guerre, les familles s'agrandissent partout au Québec.", "p": "p3", "pl": "1945-1980"}, {"y": 1945, "t": "Programmes sociaux fédéraux", "f": "Ottawa crée les pensions de vieillesse, l'assurance-chômage et les allocations familiales.", "p": "p3", "pl": "1945-1980"}, {"y": 1947, "t": "Début de la Guerre froide", "f": "affrontement idéologique entre l'URSS communiste et les États-Unis capitalistes.", "p": "p3", "pl": "1945-1980"}, {"y": 1948, "t": "Drapeau fleurdelisé", "f": "le Québec adopte son drapeau, un geste fort d'affirmation nationale.", "p": "p3", "pl": "1945-1980"}, {"y": 1948, "t": "Refus global", "f": "le manifeste de Paul-Émile Borduas dénonce le conservatisme et réclame la liberté d'expression.", "p": "p3", "pl": "1945-1980"}, {"y": 1949, "t": "Grève de l'amiante", "f": "long conflit ouvrier à Asbestos, marqué par l'appui du clergé aux grévistes.", "p": "p3", "pl": "1945-1980"}, {"y": 1950, "t": "Guerre de Corée", "f": "le Canada participe au conflit sous la bannière de l'ONU contre les communistes.", "p": "p3", "pl": "1945-1980"}, {"y": 1950, "t": "Orphelins de Duplessis", "f": "des milliers d'enfants sont placés à tort dans des institutions psychiatriques pour toucher des subventions.", "p": "p3", "pl": "1945-1980"}, {"y": 1950, "t": "Pensionnats autochtones", "f": "les enfants des Premières Nations sont arrachés à leurs familles pour être assimilés de force.", "p": "p3", "pl": "1945-1980"}, {"y": 1952, "t": "Grève du textile à Louiseville", "f": "les ouvrières du textile se soulèvent contre leurs conditions de travail.", "p": "p3", "pl": "1945-1980"}, {"y": 1954, "t": "Impôt provincial", "f": "Duplessis crée l'impôt sur le revenu du Québec pour affirmer son autonomie face à Ottawa.", "p": "p3", "pl": "1945-1980"}, {"y": 1955, "t": "Télévision et American Way of Life", "f": "la télévision entre dans 90 % des foyers et diffuse le mode de vie américain.", "p": "p3", "pl": "1945-1980"}, {"y": 1957, "t": "Grève de Murdochville", "f": "grève dure des mineurs de cuivre, réprimée avec l'appui de la police provinciale.", "p": "p3", "pl": "1945-1980"}, {"y": 1957, "t": "Fin de la Loi du cadenas", "f": "la Cour suprême invalide cette loi qui servait à emprisonner communistes et syndicalistes.", "p": "p3", "pl": "1945-1980"}, {"y": 1959, "t": "Voie maritime du Saint-Laurent", "f": "ouverture de cette grande route navigable pour le transport des marchandises.", "p": "p3", "pl": "1945-1980"}, {"y": 1959, "t": "Mort de Maurice Duplessis", "f": "fin de 15 ans de règne conservateur au Québec.", "p": "p3", "pl": "1945-1980"}, {"y": 1960, "t": "Élection de Jean Lesage", "f": "victoire libérale avec le slogan « C'est le temps que ça change », début de la Révolution tranquille.", "p": "p3", "pl": "1945-1980"}, {"y": 1960, "t": "Assurance hospitalisation", "f": "les Québécois peuvent désormais séjourner à l'hôpital gratuitement.", "p": "p3", "pl": "1945-1980"}, {"y": 1960, "t": "Droit de vote des Autochtones", "f": "les Autochtones obtiennent le droit de vote aux élections fédérales.", "p": "p3", "pl": "1945-1980"}, {"y": 1960, "t": "Pilule contraceptive", "f": "l'arrivée de la pilule donne aux femmes le contrôle de leur fécondité.", "p": "p3", "pl": "1945-1980"}, {"y": 1961, "t": "Première femme députée", "f": "Marie-Claire Kirkland-Casgrain est élue à l'Assemblée nationale.", "p": "p3", "pl": "1945-1980"}, {"y": 1962, "t": "Nationalisation de l'électricité", "f": "sous le slogan « Maîtres chez nous », Hydro-Québec devient un monopole d'État.", "p": "p3", "pl": "1945-1980"}, {"y": 1963, "t": "Commission Laurendeau-Dunton", "f": "Ottawa enquête sur la place des francophones au Canada.", "p": "p3", "pl": "1945-1980"}, {"y": 1963, "t": "Création du FLQ", "f": "le Front de libération du Québec, mouvement indépendantiste radical, voit le jour.", "p": "p3", "pl": "1945-1980"}, {"y": 1964, "t": "Ministère de l'Éducation", "f": "l'État prend en main l'école, gratuite et laïque, qui relevait de l'Église.", "p": "p3", "pl": "1945-1980"}, {"y": 1964, "t": "Code du travail", "f": "les employés de la fonction publique obtiennent le droit de se syndiquer.", "p": "p3", "pl": "1945-1980"}, {"y": 1965, "t": "Régime des rentes du Québec", "f": "chaque travailleur cotise pour toucher une rente à la retraite.", "p": "p3", "pl": "1945-1980"}, {"y": 1966, "t": "Métro de Montréal", "f": "inauguration du métro, symbole de la modernisation du Québec.", "p": "p3", "pl": "1945-1980"}, {"y": 1967, "t": "Expo 67", "f": "l'exposition universelle de Montréal accueille près de 50 millions de visiteurs.", "p": "p3", "pl": "1945-1980"}, {"y": 1967, "t": "Création des cégeps", "f": "les collèges d'enseignement général et professionnel remplacent les collèges classiques.", "p": "p3", "pl": "1945-1980"}, {"y": 1967, "t": "« Vive le Québec libre ! »", "f": "le général de Gaulle lance cette phrase célèbre lors de sa visite au Québec.", "p": "p3", "pl": "1945-1980"}, {"y": 1968, "t": "Barrage Manic-5", "f": "inauguration de cet immense barrage, le plus grand du genre au monde.", "p": "p3", "pl": "1945-1980"}, {"y": 1968, "t": "Création du Parti Québécois", "f": "René Lévesque unit les indépendantistes dans un nouveau parti.", "p": "p3", "pl": "1945-1980"}, {"y": 1969, "t": "Loi sur les langues officielles", "f": "le fédéral impose le bilinguisme dans ses institutions.", "p": "p3", "pl": "1945-1980"}, {"y": 1969, "t": "Livre blanc sur les Indiens", "f": "Ottawa propose d'abolir le statut autochtone, provoquant une vive opposition.", "p": "p3", "pl": "1945-1980"}, {"y": 1970, "t": "Élection de Robert Bourassa", "f": "les libéraux prennent le pouvoir avec un programme de développement économique.", "p": "p3", "pl": "1945-1980"}, {"y": 1970, "t": "Crise d'Octobre", "f": "le FLQ kidnappe James Cross et Pierre Laporte, Ottawa impose la Loi des mesures de guerre.", "p": "p3", "pl": "1945-1980"}, {"y": 1970, "t": "Assurance maladie", "f": "création de la RAMQ, les soins médicaux deviennent gratuits pour tous.", "p": "p3", "pl": "1945-1980"}, {"y": 1971, "t": "Projet de la Baie-James", "f": "Bourassa lance la construction de gigantesques barrages sur la rivière La Grande.", "p": "p3", "pl": "1945-1980"}, {"y": 1972, "t": "Front commun", "f": "210 000 employés du secteur public font la grève, leurs dirigeants sont emprisonnés.", "p": "p3", "pl": "1945-1980"}, {"y": 1973, "t": "Reconnaissance des droits ancestraux", "f": "le fédéral reconnaît enfin le principe des droits territoriaux des Autochtones.", "p": "p3", "pl": "1945-1980"}, {"y": 1974, "t": "Loi 22", "f": "première loi linguistique qui fait du français la langue officielle du Québec.", "p": "p3", "pl": "1945-1980"}, {"y": 1975, "t": "Charte des droits et libertés", "f": "le Québec se dote d'une charte protégeant les droits de la personne.", "p": "p3", "pl": "1945-1980"}, {"y": 1975, "t": "Convention de la Baie-James", "f": "entente historique entre le Québec, les Cris et les Inuits sur le développement du Nord.", "p": "p3", "pl": "1945-1980"}, {"y": 1976, "t": "Élection du Parti Québécois", "f": "René Lévesque devient premier ministre, une onde de choc au Canada.", "p": "p3", "pl": "1945-1980"}, {"y": 1977, "t": "Loi 101", "f": "la Charte de la langue française fait du français la langue officielle de l'État québécois.", "p": "p3", "pl": "1945-1980"}, {"y": 1977, "t": "Financement des partis politiques", "f": "nouvelle loi pour éliminer le favoritisme et assurer la transparence.", "p": "p3", "pl": "1945-1980"}, {"y": 1978, "t": "Protection du territoire agricole", "f": "une loi protège les terres agricoles contre l'étalement urbain.", "p": "p3", "pl": "1945-1980"}, {"y": 1978, "t": "Entente Couture-Cullen", "f": "le Québec obtient le droit de choisir ses immigrants.", "p": "p3", "pl": "1945-1980"}, {"y": 1980, "t": "Loi sur les normes du travail", "f": "règles minimales de conditions de travail pour tous les employés, syndiqués ou non.", "p": "p3", "pl": "1945-1980"}, {"y": 1980, "t": "Référendum sur la souveraineté-association", "f": "le 21 mai, les Québécois votent sur le projet de René Lévesque et le Non l'emporte avec 59,6 % des voix.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1981, "t": "Réélection du Parti québécois", "f": "malgré la défaite référendaire, la population réélit Lévesque pour qu'il négocie la place du Québec dans la Constitution.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1981, "t": "Nuit des longs couteaux", "f": "dans la nuit du 4 au 5 novembre, Ottawa s'entend en secret avec 9 provinces sans le Québec, qui se sent trahi.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1982, "t": "Rapatriement de la Constitution", "f": "Trudeau ramène la Constitution de Londres et y ajoute une charte des droits, mais le Québec refuse de la signer.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1982, "t": "Droits ancestraux dans la Constitution", "f": "la nouvelle Constitution reconnaît les droits ancestraux des Autochtones et une soixantaine de traités historiques.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1982, "t": "Fondation d'Alliance Québec", "f": "des anglophones créent un groupe de pression pour contester la loi 101 et défendre leurs droits linguistiques.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1982, "t": "Premier festival Juste pour rire", "f": "naissance à Montréal du plus grand festival d'humour au monde, vitrine de la culture québécoise.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1985, "t": "Fermeture de la mine de Gagnon", "f": "la ville minière de la Côte-Nord devient une ville fantôme, symbole de la dévitalisation des régions.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1986, "t": "Négociations de libre-échange", "f": "le Canada entreprend des pourparlers avec les États-Unis pour éliminer les barrières commerciales.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1987, "t": "Accord du lac Meech", "f": "Mulroney et Bourassa s'entendent sur 5 conditions pour réintégrer le Québec dans la Constitution, mais l'accord échoue en 1990.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1988, "t": "Loi 178 sur l'affichage", "f": "Bourassa impose l'affichage extérieur en français seulement en utilisant la clause dérogatoire.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1988, "t": "La Cour suprême invalide l'affichage unilingue", "f": "la Cour juge que les commerces peuvent afficher dans la langue de leur choix.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1989, "t": "Accord de libre-échange Canada-États-Unis", "f": "entrée en vigueur du traité qui libéralise le commerce entre les deux pays.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1990, "t": "Crise d'Oka", "f": "pendant 78 jours, des Mohawks armés affrontent la SQ puis l'armée canadienne pour protéger un territoire ancestral convoité pour un golf; un policier y perd la vie.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1991, "t": "Rapport Allaire et commission Bélanger-Campeau", "f": "deux comités concluent que le Québec doit obtenir plus de pouvoirs ou tenir un autre référendum.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1991, "t": "Fondation du Bloc québécois", "f": "Lucien Bouchard crée un parti souverainiste pour défendre les intérêts du Québec à Ottawa.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1991, "t": "Loi 150 sur l'avenir du Québec", "f": "Bourassa fait adopter une loi annonçant la tenue d'un référendum sur l'avenir politique du Québec.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1992, "t": "Accord de Charlottetown", "f": "nouvelle tentative constitutionnelle soumise à référendum pancanadien, rejetée par 57 % des Québécois.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1992, "t": "Politique culturelle du Québec", "f": "Québec se dote d'une politique pour affirmer son identité, soutenir les créateurs et élargir l'accès à la culture.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1993, "t": "Loi 86 sur l'affichage", "f": "Bourassa assouplit la loi et permet l'affichage bilingue à condition que le français soit prédominant.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1993, "t": "Le Bloc québécois devient l'opposition officielle", "f": "avec 54 députés élus, le parti de Bouchard devient le deuxième parti à la Chambre des communes.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1994, "t": "Entrée en vigueur de l'ALÉNA", "f": "le Mexique se joint au Canada et aux États-Unis pour créer un marché unifié en Amérique du Nord.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1995, "t": "Référendum sur la souveraineté", "f": "le 30 octobre, le Non l'emporte de justesse avec 50,58 % des voix et une participation record de 93 %.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1995, "t": "Lancement de RDI", "f": "Radio-Canada crée sa chaîne d'information continue qui informe les Québécois 24 heures sur 24.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1996, "t": "Loi sur le déficit zéro", "f": "le gouvernement Bouchard interdit les budgets déficitaires pour réduire la dette publique.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1996, "t": "Loi sur l'équité salariale", "f": "Québec oblige les entreprises à payer les femmes à leur juste valeur pour un travail équivalent.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1997, "t": "Création des CPE", "f": "Pauline Marois met sur pied les centres de la petite enfance, des garderies à 5 $ par jour.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1997, "t": "Lancement de LCN", "f": "TVA lance sa propre chaîne d'information continue en français.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1999, "t": "Création du Nunavut", "f": "Ottawa crée un nouveau territoire gouverné par les Inuits, doté d'un parlement élu.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 1999, "t": "Premiers parcs éoliens", "f": "le Québec implante ses premières éoliennes pour produire de l'électricité propre.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 2000, "t": "Loi sur la clarté référendaire", "f": "Chrétien fait adopter une loi qui encadre les conditions d'un futur référendum sur la souveraineté.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 2000, "t": "Fusions municipales", "f": "le gouvernement Bouchard fusionne de force des municipalités pour économiser, ce qui provoque beaucoup de mécontentement.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 2000, "t": "Plan d'action sur les changements climatiques", "f": "Québec adopte un plan pour réduire ses émissions de gaz à effet de serre.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 2000, "t": "Programme Brancher les familles", "f": "Québec finance le branchement des foyers à internet; aujourd'hui 90 % des ménages sont connectés.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 2002, "t": "Paix des Braves", "f": "entente historique entre Québec et les Cris qui partagent les profits de l'hydroélectricité, soit 4,5 milliards $ sur 50 ans.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 2003, "t": "Élection de Jean Charest", "f": "le chef libéral remporte trois mandats de suite, une première depuis Maurice Duplessis.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 2004, "t": "Loi sur les défusions municipales", "f": "Charest permet aux municipalités fusionnées de force de retrouver leur autonomie.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 2005, "t": "Arrivée des réseaux sociaux", "f": "Facebook et Twitter transforment la vie démocratique en permettant de dénoncer et de mobiliser rapidement.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 2006, "t": "Motion sur la nation québécoise", "f": "le gouvernement Harper fait reconnaître par la Chambre des communes que le Québec forme une nation, un geste symbolique.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 2008, "t": "Leonard Cohen au Rock and Roll Hall of Fame", "f": "le Montréalais entre au panthéon du rock, illustrant le rayonnement mondial de la culture québécoise.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 2008, "t": "Création de la Commission de vérité et réconciliation", "f": "un comité est chargé de faire la lumière sur les pensionnats autochtones et leurs sévices.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 2011, "t": "Commission Charbonneau", "f": "une enquête publique est lancée sur le financement illégal des partis et la corruption dans l'industrie de la construction.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 2011, "t": "Plan Nord", "f": "Québec lance un plan d'exploitation des ressources du Nord dans le respect du développement durable.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 2011, "t": "Les 65 ans et plus dépassent les 14 ans et moins", "f": "le vieillissement de la population devient une réalité chiffrée avec des défis pour la santé et les finances publiques.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 2012, "t": "Printemps érable", "f": "jusqu'à 350 000 étudiants font la grève pendant 6 mois contre la hausse des frais de scolarité du gouvernement Charest.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 2013, "t": "Loi sur l'aménagement durable du territoire forestier", "f": "les entreprises forestières doivent reboiser, protéger les écosystèmes et consulter les communautés locales.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 2013, "t": "Loi sur les mines", "f": "les minières doivent désormais prévoir un plan de réaménagement et de restauration des sites exploités.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 2014, "t": "Marché du carbone Québec-Californie", "f": "le Québec joint un système qui plafonne les émissions de gaz à effet de serre des entreprises.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 2016, "t": "Rapport de la Commission de vérité et réconciliation", "f": "le rapport conclut que l'État doit s'engager dans un processus de réconciliation avec les victimes des pensionnats.", "p": "p4", "pl": "1980 à nos jours"}, {"y": 2017, "t": "Accord de libre-échange Canada-Union européenne", "f": "signature de l'AECG qui ouvre le marché européen aux entreprises canadiennes et québécoises.", "p": "p4", "pl": "1980 à nos jours"}];
+const PERIODS = {
+  p1:{n:"1840 – 1896", c:"#E50914"},
+  p2:{n:"1896 – 1945", c:"#f5a623"},
+  p3:{n:"1945 – 1980", c:"#2ea8ff"},
+  p4:{n:"1980 à nos jours", c:"#7bed6c"}
+};
+const $ = id => document.getElementById(id);
+const store = { get:(k,d)=>{try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}}, set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}} };
+
+let cfg = { periods:new Set(["p1","p2","p3","p4"]), mode:"solo", teams:2 };
+let S = null;
+
+function countdownThen(fn){
+  const cd = $("countdown"), num = $("cdNum");
+  cd.classList.add("show");
+  let n = 3; num.textContent = n;
+  const tick = ()=>{ n--; if(n<=0){ cd.classList.remove("show"); fn(); return; } num.textContent = n; setTimeout(tick, 620); };
+  setTimeout(tick, 620);
+}
+function newGame(){
+  const pool = CARDS.filter(c=>cfg.periods.has(c.p));
+  if(pool.length < 5){ alert("Choisis au moins une bobine."); return; }
+  countdownThen(()=>{
+    const deck = [...pool].sort(()=>Math.random()-.5);
+    const first = deck.pop();
+    S = { deck, total:deck.length+1, line:[{c:first}], cur:null, score:0, takes:3, streak:0, over:false,
+          mode:cfg.mode, teams:cfg.mode==="teams"?Array(cfg.teams).fill(0):null, turn:0, last:null };
+    document.body.classList.add("playing");
+    drawCard(); render();
+    $("setup").style.display="none";
+    $("tlWrap").hidden = false;
+  });
+}
+function drawCard(){ if(S.deck.length===0){ endGame(); return; } S.cur = S.deck.pop(); }
+function doFlash(ok){
+  const f = $("flash");
+  f.className = "flash go " + (ok?"ok":"ko");
+  setTimeout(()=>{ f.className = "flash"; }, 600);
+}
+function place(i){
+  if(S.over || !S.cur) return;
+  const c = S.cur, line = S.line;
+  const ok = (i===0 || line[i-1].c.y <= c.y) && (i===line.length || c.y <= line[i].c.y);
+  if(S.mode==="solo"){
+    if(ok){ S.score++; }
+    else{ S.takes--; doFlash(false); showFeedback(false, c, i); if(S.takes<=0){ endGame(); return; } }
+  }else{
+    if(ok){ S.teams[S.turn]++; } else{ doFlash(false); showFeedback(false, c, i); }
+    S.turn = (S.turn+1)%S.teams.length;
+  }
+  if(ok){
+    line.splice(i,0,{c}); S.last = c; S.streak=(S.streak||0)+1; doFlash(true); showFeedback(true, c, i);
+    if(S.streak>0 && S.streak%10===0){ showReel("SÉRIE DE "+S.streak+" !", "Le projecteur avance..."); }
+  } else { S.streak=0; }
+  drawCard(); render();
+}
+function endGame(){
+  S.over = true; S.cur = null;
+  if(S.mode==="solo"){ const best = store.get("pellicule-best",0); if(S.score>best) store.set("pellicule-best",S.score); }
+  render();
+}
+function showFeedback(ok,c,i){
+  const fb=$("feedback");
+  const pos = i===0 ? "au tout début du montage" : (i===S.line.length ? "à la toute fin" : "à cet endroit du montage");
+  fb.className = "feedback show "+(ok?"ok":"ko");
+  fb.innerHTML = '<button class="close" data-close="1" aria-label="Fermer">×</button>'
+    + '<div class="verdict">'+(ok?"ON LA GARDE !":"COUPÉ ! Raté...")+"</div>"
+    + "<div class='detail'>"+c.t+" ("+c.y+") se place "+pos+".</div>"
+    + '<div class="fact">'+c.f+"</div>";
+  clearTimeout(fb._t);
+  fb._t = setTimeout(()=>fb.classList.remove("show"), 10000);
+}
+function miniHTML(c, cls){
+  const pc = PERIODS[c.p].c;
+  return '<div class="mini '+cls+'" style="--pc:'+pc+'"><div class="sprockets"></div><div class="pband"></div><div class="mbody"><div class="ftc">'+c.y+'</div><div class="ft">'+c.t+'</div><div class="fp">'+PERIODS[c.p].n+'</div></div></div>';
+}
+function render(){
+  const best = store.get("pellicule-best",0);
+  let st;
+  if(S.mode==="solo"){
+    st = '<div class="stat"><div class="takes">'+[0,1,2].map(i=>'<span class="'+(i<S.takes?"on":"off")+'">●</span>').join("")+'</div><span>Prises</span></div>'
+      + '<div class="stat"><b>'+S.score+'</b><span>Plans montés</span></div>'
+      + '<div class="stat"><b>'+best+'</b><span>Record</span></div>';
+  }else{
+    st = S.teams.map((p,i)=>'<div class="stat"><b>'+p+'</b><span>Équipe '+(i+1)+'</span></div>').join("");
+  }
+  $("stats").innerHTML = st;
+  $("tlCount").textContent = S.line.length + " plan" + (S.line.length>1?"s":"") + " au montage";
+  const done = S.line.length, pct = Math.round(done/S.total*100);
+  $("progfill").style.width = pct+"%";
+  $("progleft").textContent = done+" / "+S.total+" plans";
+  $("progright").textContent = pct+"% du film";
+  const d=$("drawn");
+  if(S.over){
+    let msg;
+    if(S.mode==="solo") msg="<p>Tu as monté <b>"+S.score+"</b> plan"+(S.score>1?"s":"")+" dans l'ordre.</p>";
+    else{ const mx=Math.max(...S.teams), w=S.teams.map((p,i)=>p===mx?i+1:0).filter(Boolean);
+      msg="<p>"+(w.length>1?"Égalité entre les équipes "+w.join(" et "):"L'équipe "+w[0]+" remporte le montage")+" !</p>"; }
+    d.innerHTML='<div class="gameover"><h2>FIN <span class="r">DU TOURNAGE</span></h2>'+msg+'<div><button class="btn" type="button" id="again">Nouveau tournage</button></div></div>';
+    $("again").onclick=()=>{ document.body.classList.remove("playing"); $("setup").style.display=""; $("tlWrap").hidden=true; $("frames").innerHTML=""; d.innerHTML=""; renderChips(); };
+  }else{
+    const pc = PERIODS[S.cur.p].c;
+    const turn = S.mode==="teams" ? "À l'équipe "+(S.turn+1)+" de monter" : "Prochain plan · "+S.deck.length+" en réserve";
+    d.innerHTML='<div class="clap-lbl">Photogramme à placer</div>'
+      +'<div class="photogram" style="--pc:'+pc+'"><div class="gloss"></div><div class="sprockets"></div><div class="pband"></div><div class="pinner"><div class="tc">'+PERIODS[S.cur.p].n+'</div><h3>'+S.cur.t+'</h3><p>'+S.cur.f+'</p><div class="dir">Note du monteur : clique sur une collure ⊕ pour insérer ce plan au bon endroit.</div></div><div class="sprockets"></div></div>'
+      +'<div class="clap-lbl">'+turn+'</div>';
+  }
+  let h="";
+  S.line.forEach((e,i)=>{
+    h+='<div class="splice'+(S.over?" off":"")+'"><button type="button" data-i="'+i+'" aria-label="Collure avant '+e.c.t+'">⊕</button></div>';
+    h+=miniHTML(e.c, (e.c===S.last?"new":""));
+  });
+  h+='<div class="splice'+(S.over?" off":"")+'"><button type="button" data-i="'+S.line.length+'" aria-label="Collure à la fin">⊕</button></div>';
+  $("frames").innerHTML=h;
+}
+$("frames").addEventListener("click",e=>{ const b=e.target.closest("button[data-i]"); if(b) place(+b.dataset.i); });
+$("feedback").addEventListener("click",e=>{ if(e.target.closest("[data-close]")) $("feedback").classList.remove("show"); });
+function showReel(big, small){
+  let r = $("reel");
+  if(!r){
+    r = document.createElement("div"); r.id="reel"; r.className="reelbanner";
+    r.innerHTML='<div class="reelbig"></div><div class="reelsmall"></div>';
+    document.body.appendChild(r);
+  }
+  r.querySelector(".reelbig").textContent = big;
+  r.querySelector(".reelsmall").textContent = small;
+  r.classList.remove("show"); void r.offsetWidth; r.classList.add("show");
+  clearTimeout(r._t); r._t = setTimeout(()=>r.classList.remove("show"), 2600);
+}
+
+function renderChips(){
+  $("periodReels").innerHTML = Object.entries(PERIODS).map(([k,v])=>{
+    const n=CARDS.filter(c=>c.p===k).length;
+    return '<button type="button" class="reelbtn" data-k="'+k+'" style="--c:'+v.c+'" aria-pressed="'+cfg.periods.has(k)+'"><div class="can"></div><div class="rname">'+v.n+'</div><div class="rcount">'+n+' événements</div></button>';
+  }).join("");
+  $("modeChips").innerHTML = [["solo","Solo (3 prises)"],["teams","Classe en équipes"]].map(([k,n])=>
+    '<button type="button" class="chip" data-k="'+k+'" aria-pressed="'+(cfg.mode===k)+'">'+n+'</button>').join("");
+  $("teamChips").innerHTML = [2,3,4].map(n=>
+    '<button type="button" class="chip" data-n="'+n+'" aria-pressed="'+(cfg.teams===n)+'">'+n+' équipes</button>').join("");
+  $("teamBox").hidden = cfg.mode!=="teams";
+  /* légende supprimée : les bobines suffisent */
+}
+$("periodReels").onclick=e=>{const b=e.target.closest(".reelbtn");if(!b)return;const k=b.dataset.k;cfg.periods.has(k)?cfg.periods.delete(k):cfg.periods.add(k);renderChips();};
+$("modeChips").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;cfg.mode=b.dataset.k;renderChips();};
+$("teamChips").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;cfg.teams=+b.dataset.n;renderChips();};
+function armAndStart(){
+  const sb = $("startBtn");
+  sb.classList.add("armed");
+  sb.querySelector(".slabel").textContent = "ACTION !";
+  setTimeout(newGame, 420);
+}
+$("startBtn").onclick=armAndStart;
+$("startBtn").onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); armAndStart(); } };
+
+renderChips();
+</script>
+</body>
+</html>
